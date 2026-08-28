@@ -47,6 +47,12 @@ jobs:
       - name: Build Windows Release
         run: cargo build --release
 
+      - name: Rename Binaries
+        run: |
+          cd target/release
+          move gui.exe rektal_client.exe
+          move kernel.exe rektal_kernel.exe
+
       - name: Install Inno Setup
         run: choco install innosetup -y
 
@@ -59,7 +65,7 @@ jobs:
         with:
           files: |
             output_installer/Rektal-Setup-x64.exe
-            target/release/rektal.exe
-            target/release/kernel.exe
+            target/release/rektal_client.exe
+            target/release/rektal_kernel.exe
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

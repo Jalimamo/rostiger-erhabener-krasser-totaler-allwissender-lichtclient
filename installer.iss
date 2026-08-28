@@ -20,11 +20,11 @@ Name: "spanish"; MessagesFile: "compiler:Languages\Spanish.isl"
 
 [Files]
 ; Copies the compiled release binaries from the Windows build into the installation directory
-Source: "target\release\rektal.exe"; DestDir: "{app}"; Flags: ignoreversion
-Source: "target\release\kernel.exe"; DestDir: "{app}"; Flags: ignoreversion
+Source: "target\release\rektal_client.exe"; DestDir: "{app}"; Flags: ignoreversion
+Source: "target\release\rektal_kernel.exe"; DestDir: "{app}"; Flags: ignoreversion
 
 [Icons]
 ; Creates user-friendly shortcuts in the Windows Start Menu
-Name: "{group}\R.E.K.T.A.L. Client"; Filename: "{app}\rektal.exe"
-Name: "{group}\R.E.K.T.A.L. Kernel Server"; Filename: "{app}\kernel.exe"
+Name: "{group}\R.E.K.T.A.L. Client"; Filename: "{app}\rektal_client.exe"
+Name: "{group}\R.E.K.T.A.L. Kernel"; Filename: "{app}\rektal_kernel.exe"
 Name: "{group}\Uninstall R.E.K.T.A.L."; Filename: "{uninstallexe}"

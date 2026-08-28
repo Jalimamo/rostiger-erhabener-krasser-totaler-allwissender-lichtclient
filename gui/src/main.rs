@@ -37,7 +37,7 @@ pub static UI_EVENT_SENDER: LazyLock<RwLock<Option<Sender<UiEvent>>>> =
 /// and starts the `eframe` event loop with [`MyApp`].
 fn main() -> eframe::Result<()> {
     let log_path = std::env::temp_dir().join("rektal_gui.log");
-    Logger::global().add_sink(Box::new(FileSink::new(log_path.to_str().unwrap_or("/tmp/rektal_gui.log"))));
+    Logger::global().add_sink(Box::new(FileSink::new(log_path.to_str().unwrap_or("rektal_gui.log"))));
     Logger::global().add_sink(Box::new(TerminalSink { cli_prompt: None }));
 
     let icon = {
