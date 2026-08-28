@@ -14,6 +14,7 @@ fn hash_directory(dir: &Path, hasher: &mut DefaultHasher) {
             hash_directory(&path, hasher);
         } else if path.extension().and_then(|s| s.to_str()) == Some("rs") {
             let content = fs::read(&path).unwrap();
+            println!("cargo:warning=Hashing file: {:?} (Bytes: {})", path, content.len());
             content.hash(hasher);
         }
     }
@@ -24,6 +25,8 @@ fn main() {
 
     hash_directory(Path::new("src"), &mut hasher);
     let hash_str = hasher.finish().to_string();
+
+    println!("cargo:warning=Final Protocol Hash: {}", hash_str);
 
     println!("cargo:rustc-env=PROTOCOL_HASH={}", hash_str);
 
