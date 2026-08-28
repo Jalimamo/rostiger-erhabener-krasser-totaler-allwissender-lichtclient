@@ -20,15 +20,25 @@ jobs:
       - name: Install Rust Toolchain
         uses: dtolnay/rust-toolchain@stable
 
-      - name: Build Workspace
+      - name: Build Linux Release
         run: cargo build --release
+
+      - name: Rename Binaries
+        run: |
+          cd target/release
+          mv gui rektal_client
+          mv kernel rektal_kernel
+
+      - name: Create Tarball (.tar.gz)
+        run: |
+          cd target/release
+          tar -czvf rektal-linux-x64.tar.gz rektal_client rektal_kernel
 
       - name: Publish Release
         uses: softprops/action-gh-release@v1
         with:
           files: |
-            target/release/gui
-            target/release/kernel
+            target/release/rektal-linux-x64.tar.gz
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -65,7 +75,40 @@ jobs:
         with:
           files: |
             output_installer/Rektal-Setup-x64.exe
-            target/release/rektal_client.exe
-            target/release/rektal_kernel.exe
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  build-macos:
+    name: Build macOS Binaries
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Install Rust Toolchain
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Build macOS Release
+        run: cargo build --release
+
+      - name: Rename Binaries
+        run: |
+          cd target/release
+          mv gui rektal_client
+          mv kernel rektal_kernel
+
+      - name: Create MacOS DMG Image
+        run: |
+          mkdir -p macos_dist
+          cp target/release/rektal_client macos_dist/
+          cp target/release/rektal_kernel macos_dist/
+          hdiutil create -volname "R.E.K.T.A.L." -srcfolder macos_dist -ov -format UDZO Rektal-macOS.dmg
+
+      - name: Upload macOS Assets to Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            Rektal-macOS.dmg
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
