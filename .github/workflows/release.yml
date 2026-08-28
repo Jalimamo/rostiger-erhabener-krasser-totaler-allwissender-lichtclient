@@ -10,7 +10,7 @@ permissions:
 
 jobs:
   build-linux:
-    name: Build and Create Release
+    name: Build and package Linux Binaries
     runs-on: ubuntu-latest
 
     steps:
@@ -44,7 +44,7 @@ jobs:
 
 
   build-windows:
-    name: Build Windows Setup & Binaries
+    name: Build and package Windows Binaries
     runs-on: windows-latest
 
     steps:
@@ -79,7 +79,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   build-macos:
-    name: Build macOS Binaries
+    name: Build and package macOS Binaries
     runs-on: macos-latest
 
     steps:
