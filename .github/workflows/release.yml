@@ -9,7 +9,7 @@ permissions:
   contents: write
 
 jobs:
-  build-and-release:
+  build-linux:
     name: Build and Create Release
     runs-on: ubuntu-latest
 
@@ -29,5 +29,37 @@ jobs:
           files: |
             target/release/gui
             target/release/kernel
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+
+  build-windows:
+    name: Build Windows Setup & Binaries
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Install Rust Toolchain
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Build Windows Release
+        run: cargo build --release
+
+      - name: Install Inno Setup
+        run: choco install innosetup -y
+
+      - name: Compile Installer with Inno Setup
+        run: |
+          & "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" installer.iss
+
+      - name: Upload Windows Setup to Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            output_installer/Rektal-Setup-x64.exe
+            target/release/rektal.exe
+            target/release/kernel.exe
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
