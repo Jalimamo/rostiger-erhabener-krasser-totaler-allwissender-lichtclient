@@ -1,10 +1,18 @@
+#ifndef MyAppVersion
+#define MyAppVersion "0.2.1"
+#endif
+
+#ifndef MyArch
+#define MyArch "x64"
+#endif
+
 [Setup]
 AppName=R.E.K.T.A.L.
-AppVersion=0.2.1
+AppVersion={#MyAppVersion}
 DefaultDirName={autopf}\R.E.K.T.A.L.
 DefaultGroupName=R.E.K.T.A.L.
 OutputDir=output_installer
-OutputBaseFilename=Rektal-Setup-x64
+OutputBaseFilename=Rektal-Setup-{#MyArch}-{#MyAppVersion}
 Compression=lzma2
 SolidCompression=yes
 PrivilegesRequired=lowest
@@ -20,8 +28,8 @@ Name: "spanish"; MessagesFile: "compiler:Languages\Spanish.isl"
 
 [Files]
 ; Copies the compiled release binaries from the Windows build into the installation directory
-Source: "target\release\rektal_client.exe"; DestDir: "{app}"; Flags: ignoreversion
-Source: "target\release\rektal_kernel.exe"; DestDir: "{app}"; Flags: ignoreversion
+Source: "windows_dist\rektal_client.exe"; DestDir: "{app}"; Flags: ignoreversion
+Source: "windows_dist\rektal_kernel.exe"; DestDir: "{app}"; Flags: ignoreversion
 
 [Icons]
 ; Creates user-friendly shortcuts in the Windows Start Menu

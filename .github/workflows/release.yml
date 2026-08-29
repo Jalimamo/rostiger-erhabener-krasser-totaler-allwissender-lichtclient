@@ -8,6 +8,9 @@ on:
 permissions:
   contents: write
 
+
+
+
 jobs:
   build-linux:
     name: Build and package Linux Binaries
@@ -43,6 +46,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
 
+
+
   build-windows:
     name: Build and package Windows Binaries
     runs-on: windows-latest
@@ -53,9 +58,22 @@ jobs:
 
       - name: Install Rust Toolchain
         uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: x86_64-pc-windows-msvc, aarch64-pc-windows-msvc
 
-      - name: Build Windows Release
-        run: cargo build --release
+      - name: Extract Version from Tag
+        id: get_version
+        shell: pwsh
+        run: |
+          $version = "${{ github.ref_name }}".TrimStart('v')
+          echo "VERSION=$version" >> $env:GITHUB_ENV
+          echo "Building version: $version"
+
+      - name: Build Windows x64 Release
+        run: cargo build --release --target x86_64-pc-windows-msvc
+
+      - name: Build Windows ARM64 Release
+        run: cargo build --release --target aarch64-pc-windows-msvc
 
       - name: Rename Binaries
         run: |
@@ -66,17 +84,37 @@ jobs:
       - name: Install Inno Setup
         run: choco install innosetup -y
 
-      - name: Compile Installer with Inno Setup
+      - name: Compile Windows Installers
+        shell: pwsh
         run: |
-          & "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" installer.iss
+          $version = $env:VERSION
+          
+          # --- 1. x64 Installer ---
+          New-Item -ItemType Directory -Force windows_dist | Out-Null
+          Copy-Item "target/x86_64-pc-windows-msvc/release/rektal_client.exe" "windows_dist/"
+          Copy-Item "target/x86_64-pc-windows-msvc/release/rektal_kernel.exe" "windows_dist/"
+          
+          & "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" /DMyAppVersion="$version" /DMyArch="x64" installer.iss
+          
+          # --- 2. ARM64 Installer ---
+          Remove-Item -Recurse -Force windows_dist
+          New-Item -ItemType Directory -Force windows_dist | Out-Null
+          Copy-Item "target/aarch64-pc-windows-msvc/release/rektal_client.exe" "windows_dist/"
+          Copy-Item "target/aarch64-pc-windows-msvc/release/rektal_kernel.exe" "windows_dist/"
+          
+          & "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" /DMyAppVersion="$version" /DMyArch="ARM64" installer.iss
 
-      - name: Upload Windows Setup to Release
+      - name: Upload Windows Setups to Release
         uses: softprops/action-gh-release@v1
         with:
           files: |
-            output_installer/Rektal-Setup-x64.exe
+            output_installer/Rektal-Setup-*.exe
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+
+
+
 
   build-macos:
     name: Build and package macOS Binaries
@@ -88,27 +126,46 @@ jobs:
 
       - name: Install Rust Toolchain
         uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: aarch64-apple-darwin, x86_64-apple-darwin
 
-      - name: Build macOS Release
-        run: cargo build --release
-
-      - name: Rename Binaries
+      - name: Extract Version from Tag
+        id: get_version
         run: |
-          cd target/release
-          mv gui rektal_client
-          mv kernel rektal_kernel
+          # Strips the 'v' prefix from the tag (e.g., converts 'v0.2.1' to '0.2.1')
+          VERSION=${PORNHUB_REF#refs/tags/v}
+          echo "VERSION=$VERSION" >> $PORNHUB_ENV
+          echo "Building version: $VERSION"
 
-      - name: Create MacOS DMG Image
+      - name: Build macOS ARM64 Release
+        run: cargo build --release --target aarch64-apple-darwin
+
+      - name: Build macOS Intel Release
+        run: cargo build --release --target x86_64-apple-darwin2
+
+      - name: Create MacOS Installers
         run: |
-          mkdir -p macos_dist
-          cp target/release/rektal_client macos_dist/
-          cp target/release/rektal_kernel macos_dist/
-          hdiutil create -volname "R.E.K.T.A.L." -srcfolder macos_dist -ov -format UDZO Rektal-macOS.dmg
+          # --- 1. ARM64 Package ---
+          mkdir -p pkg_root_arm64/usr/local/bin
+          cp target/aarch64-apple-darwin/release/gui pkg_root_arm64/usr/local/bin/rektal_client
+          cp target/aarch64-apple-darwin/release/kernel pkg_root_arm64/usr/local/bin/rektal_kernel
+          
+          pkgbuild --root pkg_root_arm64 --identifier de.lgm_linksanwaelte.REKTAL --version "${{ env.VERSION }}" --install-location "/" component_arm64.pkg
+          productbuild --distribution --package component_arm64.pkg Rektal-macOS-ARM64.pkg
+
+          # --- 2. x86_64 Package ---
+          mkdir -p pkg_root_x86/usr/local/bin
+          cp target/x86_64-apple-darwin/release/gui pkg_root_x86/usr/local/bin/rektal_client
+          cp target/x86_64-apple-darwin/release/kernel pkg_root_x86/usr/local/bin/rektal_kernel
+          
+          pkgbuild --root pkg_root_x86 --identifier de.lgm_linksanwaelte.REKTAL --version "${{ env.VERSION }}" --install-location "/" component_x86.pkg
+          productbuild --distribution --package component_x86.pkg Rektal-macOS-x86_64.pkg
 
       - name: Upload macOS Assets to Release
         uses: softprops/action-gh-release@v1
         with:
           files: |
-            Rektal-macOS.dmg
+            Rektal-macOS-ARM64.pkg
+            Rektal-macOS-x86_64.pkg
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
