@@ -75,12 +75,6 @@ jobs:
       - name: Build Windows ARM64 Release
         run: cargo build --release --target aarch64-pc-windows-msvc
 
-      - name: Rename Binaries
-        run: |
-          cd target/release
-          move gui.exe rektal_client.exe
-          move kernel.exe rektal_kernel.exe
-
       - name: Install Inno Setup
         run: choco install innosetup -y
 
