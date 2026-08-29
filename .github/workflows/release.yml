@@ -158,7 +158,6 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           files: |
-            Rektal-macOS-ARM64.pkg
-            Rektal-macOS-x86_64.pkg
+            Rektal-macOS-*.pkg
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
