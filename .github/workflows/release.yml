@@ -91,16 +91,16 @@ jobs:
           
           # --- 1. x64 Installer ---
           New-Item -ItemType Directory -Force windows_dist | Out-Null
-          Copy-Item "target/x86_64-pc-windows-msvc/release/rektal_client.exe" "windows_dist/"
-          Copy-Item "target/x86_64-pc-windows-msvc/release/rektal_kernel.exe" "windows_dist/"
+          Copy-Item "target/x86_64-pc-windows-msvc/release/gui.exe" "windows_dist/rektal_client.exe"
+          Copy-Item "target/x86_64-pc-windows-msvc/release/kernel.exe" "windows_dist/rektal_kernel.exe"
           
           & "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" /DMyAppVersion="$version" /DMyArch="x64" installer.iss
           
           # --- 2. ARM64 Installer ---
           Remove-Item -Recurse -Force windows_dist
           New-Item -ItemType Directory -Force windows_dist | Out-Null
-          Copy-Item "target/aarch64-pc-windows-msvc/release/rektal_client.exe" "windows_dist/"
-          Copy-Item "target/aarch64-pc-windows-msvc/release/rektal_kernel.exe" "windows_dist/"
+          Copy-Item "target/aarch64-pc-windows-msvc/release/gui.exe" "windows_dist/rektal_client.exe"
+          Copy-Item "target/aarch64-pc-windows-msvc/release/kernel.exe" "windows_dist/rektal_kernel.exe"
           
           & "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" /DMyAppVersion="$version" /DMyArch="ARM64" installer.iss
 
