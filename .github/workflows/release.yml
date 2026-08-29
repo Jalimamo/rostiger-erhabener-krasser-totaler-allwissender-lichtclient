@@ -133,8 +133,8 @@ jobs:
         id: get_version
         run: |
           # Strips the 'v' prefix from the tag (e.g., converts 'v0.2.1' to '0.2.1')
-          VERSION=${PORNHUB_REF#refs/tags/v}
-          echo "VERSION=$VERSION" >> $PORNHUB_ENV
+          VERSION=${GITHUB_REF#refs/tags/v}
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
           echo "Building version: $VERSION"
 
       - name: Build macOS ARM64 Release
